@@ -62,7 +62,7 @@ java -cp bin com.microvm.Main examples/01_math_basics.asm
 │   ├── 03_logic_equality.asm # Demonstrates EQ operator
 │   ├── 04_variables.asm      # Demonstrates STORE and LOAD with registers
 │   └── 05_loops_and_jumps.asm# Demonstrates Turing Complete Control Flow!
-├── program.asm               # Default assembly sandbox
+├── program.asm               # Default assembly sandbox (Fibonacci Sequence Showcase)
 ├── src/com/microvm/
 │   ├── Instruction.java      # Defines the ISA and mapping logic
 │   ├── Parser.java           # Reads .asm files and builds byte arrays
@@ -71,19 +71,29 @@ java -cp bin com.microvm.Main examples/01_math_basics.asm
 ```
 
 ## 💻 Sample Execution Trace
-Running `examples/01_math_basics.asm`:
+Running `program.asm` (Fibonacci Generator):
 ```text
-Reading assembly from: ...\examples\01_math_basics.asm
-Assembly successfully compiled. Total program size: 14 bytes.
+Reading assembly from: ...\program.asm
+Assembly successfully compiled. Total program size: 55 bytes.
 
 --- VM Execution Started ---
-IP: 0005 | PUSH 10      | Stack: [10]
-IP: 0010 | PUSH 5       | Stack: [10, 5]
-IP: 0011 | MUL          | Stack: [50]
-IP: 0016 | PUSH 2       | Stack: [50, 2]
-IP: 0017 | DIV          | Stack: [25]
->> PRINT OUT: 25
-IP: 0018 | PRINT        | Stack: [25]
-IP: 0019 | HALT         | Stack: [25]
+IP: 0005 | PUSH 0       | Stack: [0] | Regs: [0, 0, 0, 0]
+IP: 0010 | STORE 0      | Stack: [] | Regs: [0, 0, 0, 0]
+IP: 0015 | PUSH 1       | Stack: [1] | Regs: [0, 0, 0, 0]
+IP: 0020 | STORE 1      | Stack: [] | Regs: [0, 1, 0, 0]
+IP: 0025 | PUSH 10      | Stack: [10] | Regs: [0, 1, 0, 0]
+IP: 0030 | STORE 2      | Stack: [] | Regs: [0, 1, 10, 0]
+IP: 0035 | LOAD 0       | Stack: [0] | Regs: [0, 1, 10, 0]
+>> PRINT OUT: 0
+IP: 0036 | PRINT        | Stack: [0] | Regs: [0, 1, 10, 0]
+...
+IP: 0035 | LOAD 0       | Stack: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34] | Regs: [34, 55, 1, 55]
+>> PRINT OUT: 34
+IP: 0036 | PRINT        | Stack: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34] | Regs: [34, 55, 1, 55]
+...
+IP: 0103 | PUSH 9999    | Stack: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 9999] | Regs: [55, 89, 0, 89]
+>> PRINT OUT: 9999
+IP: 0104 | PRINT        | Stack: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 9999] | Regs: [55, 89, 0, 89]
+IP: 0105 | HALT         | Stack: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 9999] | Regs: [55, 89, 0, 89]
 --- VM Execution Finished ---
 ```
