@@ -23,6 +23,11 @@ public enum Instruction {
     STORE((byte) 0x0C, true),
     LOAD((byte) 0x0D, true),
     
+    // Control Flow (Jumps)
+    JMP((byte) 0x0E, true),
+    JZ((byte) 0x0F, true),
+    JNZ((byte) 0x10, true),
+    
     // Logical Operations
     EQ((byte) 0x0B, false),
     

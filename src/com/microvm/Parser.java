@@ -4,20 +4,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Parses raw custom assembly text and converts it into a clean executable byte array.
+ * Supports a two-pass assembly process to resolve jump labels.
  */
 public class Parser {
 
-    /**
-     * Reads a text file of custom assembly and outputs compiled bytecode.
-     * 
-     * @param filePath The path to the assembly file
-     * @return A primitive byte array representing the compiled program
-     * @throws IOException If file reading fails
-     */
     public static byte[] parse(Path filePath) throws IOException {
         List<String> lines = Files.readAllLines(filePath);
         StringBuilder sb = new StringBuilder();
@@ -31,41 +27,73 @@ public class Parser {
             sb.append(line).append(" ");
         }
 
-        // Sanitize input: Replace commas with spaces, trim, and split by any whitespace.
+        // Sanitize input
         String[] tokens = sb.toString().replace(",", " ").trim().split("\\s+");
         
-        // If empty file
         if (tokens.length == 1 && tokens[0].isEmpty()) {
             return new byte[0];
         }
 
-        // Allocate a generous buffer. 
-        ByteBuffer buffer = ByteBuffer.allocate(tokens.length * 5);
+        // Pass 1: Compute Byte Offsets and Register Labels
+        Map<String, Integer> labels = new HashMap<>();
+        int currentByteOffset = 0;
         
         for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i].isEmpty()) {
+            String token = tokens[i];
+            if (token.isEmpty()) continue;
+            
+            // If token is a label definition (ends with colon)
+            if (token.endsWith(":")) {
+                String labelName = token.substring(0, token.length() - 1);
+                labels.put(labelName, currentByteOffset);
                 continue;
             }
             
-            Instruction inst = Instruction.fromString(tokens[i]);
+            Instruction inst = Instruction.fromString(token);
+            currentByteOffset += 1; // 1 byte for opcode
+            
+            if (inst.hasOperand()) {
+                currentByteOffset += 4; // 4 bytes for integer operand
+                i++; // Skip the operand token in this pass
+            }
+        }
+
+        // Pass 2: Generate Bytecode
+        ByteBuffer buffer = ByteBuffer.allocate(currentByteOffset);
+        
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            if (token.isEmpty() || token.endsWith(":")) {
+                continue; // Skip empty tokens and label definitions
+            }
+            
+            Instruction inst = Instruction.fromString(token);
             buffer.put(inst.getOpcode());
             
             if (inst.hasOperand()) {
-                i++; // Advance to the operand token
+                i++;
                 if (i >= tokens.length) {
                     throw new IllegalArgumentException("Missing operand for instruction: " + inst.name());
                 }
                 
-                try {
-                    int operand = Integer.parseInt(tokens[i]);
-                    buffer.putInt(operand); // 4 bytes for the integer operand
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("Invalid integer operand: " + tokens[i]);
+                String operandStr = tokens[i];
+                int operand;
+                
+                // If the operand is a known label, use its byte offset. Otherwise parse as Integer.
+                if (labels.containsKey(operandStr)) {
+                    operand = labels.get(operandStr);
+                } else {
+                    try {
+                        operand = Integer.parseInt(operandStr);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("Unknown label or invalid integer operand: " + operandStr);
+                    }
                 }
+                
+                buffer.putInt(operand);
             }
         }
         
-        // Extract the exact sized byte array from the buffer
         byte[] program = new byte[buffer.position()];
         buffer.flip();
         buffer.get(program);

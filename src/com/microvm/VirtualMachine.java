@@ -122,6 +122,19 @@ public class VirtualMachine {
                 if (operand < 0 || operand > 3) throw new IllegalArgumentException("Invalid register index: " + operand);
                 stack[++stackPointer] = registers[operand];
                 break;
+            case JMP:
+                instructionPointer = operand;
+                break;
+            case JZ:
+                ensureStack(1, "JZ");
+                a = stack[stackPointer--];
+                if (a == 0) instructionPointer = operand;
+                break;
+            case JNZ:
+                ensureStack(1, "JNZ");
+                a = stack[stackPointer--];
+                if (a != 0) instructionPointer = operand;
+                break;
             case EQ:
                 ensureStack(2, "EQ");
                 b = stack[stackPointer--];

@@ -31,6 +31,9 @@ The codebase is engineered to demonstrate the lowest-level concepts of interpret
 | `0x0B` | **`EQ`**  | Pops two items, if equal pushes `1`, otherwise `0` | *None* |
 | `0x0C` | **`STORE`**| Pops top item and stores it in the given register (0-3)| `[index]` |
 | `0x0D` | **`LOAD`** | Copies value from given register (0-3) and pushes it | `[index]` |
+| `0x0E` | **`JMP`**  | Jumps the execution to a specific Label | `[label]` |
+| `0x0F` | **`JZ`**   | Pops top item, if it's `0`, jumps to the Label | `[label]` |
+| `0x10` | **`JNZ`**  | Pops top item, if it's NOT `0`, jumps to the Label | `[label]` |
 | `0x05` | **`PRINT`**| Prints the top item of the stack to the console | *None* |
 | `0x00` | **`HALT`**| Terminates the VM execution loop safely | *None* |
 
@@ -57,7 +60,8 @@ java -cp bin com.microvm.Main examples/01_math_basics.asm
 │   ├── 01_math_basics.asm    # Demonstrates ADD, SUB, MUL, DIV
 │   ├── 02_stack_tricks.asm   # Demonstrates DUP and SWAP
 │   ├── 03_logic_equality.asm # Demonstrates EQ operator
-│   └── 04_variables.asm      # Demonstrates STORE and LOAD with registers
+│   ├── 04_variables.asm      # Demonstrates STORE and LOAD with registers
+│   └── 05_loops_and_jumps.asm# Demonstrates Turing Complete Control Flow!
 ├── program.asm               # Default assembly sandbox
 ├── src/com/microvm/
 │   ├── Instruction.java      # Defines the ISA and mapping logic
