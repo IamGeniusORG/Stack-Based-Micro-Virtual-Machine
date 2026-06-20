@@ -1,0 +1,10 @@
+// Logic Equality Check
+PUSH 42
+PUSH 42
+EQ
+PRINT
+PUSH 42
+PUSH 10
+EQ
+PRINT
+HALT
